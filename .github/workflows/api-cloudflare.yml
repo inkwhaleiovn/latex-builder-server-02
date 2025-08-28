@@ -60,11 +60,8 @@ jobs:
           echo "Tunnel started."
           tail -n +1 cftunnel.log | sed -n '1,120p'
 
-      # - name: Keep alive for 5 hours
-      #   run: sleep $((5 * 60 * 60))
-
-      - name: Keep alive 10 minutes
-        run: sleep $((10 * 60))
+      - name: Keep alive for 5 hours
+        run: sleep $((5 * 60 * 60))
 
       - name: Create new action trigger
         env:
