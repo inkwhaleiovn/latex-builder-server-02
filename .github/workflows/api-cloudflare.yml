@@ -78,5 +78,5 @@ jobs:
             https://api.github.com/repos/$GH_OWNER/$GH_REPO/actions/workflows/api-cloudflare.yml/dispatches \
             -d '{"ref":"main"}'
 
-      - name: Keep alive 1.5 minutes
-        run: sleep $((1.5 * 60))
+      - name: Keep alive 2 minutes
+        run: sleep $((2 * 60))
