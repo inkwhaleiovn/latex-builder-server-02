@@ -14,6 +14,7 @@ jobs:
       contents: read
     env:
       PORT: 3000
+      DOCKER_IMAGE: thanhtai195/latex-builder-1.0:latest
     steps:
       - uses: actions/checkout@v4
 
@@ -24,16 +25,31 @@ jobs:
           wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared-linux-amd64.deb || sudo apt-get -f install -y
 
-      - name: Build Docker image
+      - name: Pull public Docker image
         run: |
-          docker build -t my-node-app ./
+          docker pull "$DOCKER_IMAGE" || true
+          docker images | head -n 5
 
-      - name: Start your app in Docker
+      - name: Start app container from pulled image
         run: |
-          docker run -d --name my-node-app -p $PORT:$PORT my-node-app
-          sleep 5
-          docker ps
-          ss -lntp | grep ":$PORT" || (echo "App not listening on $PORT" && exit 1)
+          # Dừng & xóa container cũ nếu có
+          docker rm -f api-container 2>/dev/null || true
+          # Chạy container từ image public
+          docker run -d --name api-container \
+            -e PORT=$PORT \
+            -p $PORT:$PORT \
+            "$DOCKER_IMAGE"
+
+          echo "Waiting for app to listen on :$PORT ..."
+          for i in $(seq 1 30); do
+            if ss -lntp | grep -q ":$PORT"; then
+              echo "App is listening on port $PORT"
+              break
+            fi
+            sleep 1
+          done
+          # Nếu chưa nghe cổng thì in log và fail
+          ss -lntp | grep ":$PORT" || (echo "App not listening on $PORT"; docker logs --tail=200 api-container; exit 1)
 
       - name: Run Cloudflare Named Tunnel
         env:
@@ -42,6 +58,7 @@ jobs:
           nohup cloudflared tunnel --no-autoupdate run --token "$CF_TUNNEL_TOKEN" > cftunnel.log 2>&1 &
           sleep 2
           echo "Tunnel started."
+          tail -n +1 cftunnel.log | sed -n '1,120p'
 
       - name: Keep alive for 5 hours
         run: sleep $((5 * 60 * 60))
