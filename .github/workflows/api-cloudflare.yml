@@ -5,9 +5,6 @@ on:
     paths:
       - ".github/workflows/api-cloudflare.yml"
       - "app/**"
-  schedule:
-    # - cron: "0 */5 * * *" # Chạy mỗi 5 giờ để giữ tunnel sống
-    - cron: "*/10 * * * *"
 
 jobs:
   run:
@@ -66,5 +63,20 @@ jobs:
       # - name: Keep alive for 5 hours
       #   run: sleep $((5 * 60 * 60))
 
-      - name: Keep alive 5 minutes
-        run: sleep $((5 * 60))
+      - name: Keep alive 10 minutes
+        run: sleep $((10 * 60))
+
+      - name: Create new action trigger
+        env:
+          GH_OWNER: ${{ secrets.GH_OWNER }}
+          GH_REPO: ${{ secrets.GH_REPO }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Trigger action:"
+          curl -X POST -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/$GH_OWNER/$GH_REPO/actions/workflows/api-cloudflare.yml/dispatches \
+            -d '{"ref":"main"}'
+
+      - name: Keep alive 1.5 minutes
+        run: sleep $((1.5 * 60))
