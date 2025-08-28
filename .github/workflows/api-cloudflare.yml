@@ -9,12 +9,11 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
     permissions:
       contents: read
     env:
       PORT: 3000
-      DOCKER_IMAGE: thanhtai195/latex-builder-1.0:latest
+      DOCKER_IMAGE: thanhtai195/latex-builder-1.0:production
     steps:
       - uses: actions/checkout@v4
 
