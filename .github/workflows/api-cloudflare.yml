@@ -54,14 +54,6 @@ jobs:
           # Nếu chưa nghe cổng thì in log và fail
           ss -lntp | grep ":$PORT" || (echo "App not listening on $PORT"; docker logs --tail=200 api-container; exit 1)
 
-      - name: Stop old Cloudflare tunnel
-        env:
-          CF_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-        run: |
-          # Cleanup tất cả instance cũ của tunnel gắn với token
-          cloudflared tunnel --no-autoupdate cleanup --token "$CF_TUNNEL_TOKEN" || true
-          echo "Stopped old tunnel (if any)"
-
       - name: Run Cloudflare Named Tunnel
         env:
           CF_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
@@ -71,5 +63,8 @@ jobs:
           echo "Tunnel started."
           tail -n +1 cftunnel.log | sed -n '1,120p'
 
-      - name: Keep alive for 5 hours
-        run: sleep $((5 * 60 * 60))
+      # - name: Keep alive for 5 hours
+      #   run: sleep $((5 * 60 * 60))
+
+      - name: Keep alive 5 minutes
+        run: sleep $((5 * 60))
