@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t my-node-app ./app
+          docker build -t my-node-app ./
 
       - name: Start your app in Docker
         run: |
