@@ -54,7 +54,11 @@ jobs:
         env:
           CF_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         run: |
-          nohup cloudflared tunnel --no-autoupdate run --token "$CF_TUNNEL_TOKEN" > cftunnel.log 2>&1 &
+          nohup cloudflared tunnel --no-autoupdate run \
+            --token "$CF_TUNNEL_TOKEN" \
+            --connections 8 \
+            --protocol http2 \
+            > cftunnel.log 2>&1 &
           sleep 2
           echo "Tunnel started."
           tail -n +1 cftunnel.log | sed -n '1,120p'
