@@ -29,12 +29,19 @@ jobs:
           docker pull "$DOCKER_IMAGE" || true
           docker images | head -n 5
 
+      - name: Create .env file
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.ENV_FILE }}
+          EOF
+
       - name: Start app container from pulled image
         run: |
           # Dừng & xóa container cũ nếu có
           docker rm -f api-container 2>/dev/null || true
           # Chạy container từ image public
           docker run -d --name api-container \
+            --env-file .env \
             -e PORT=$PORT \
             -p $PORT:$PORT \
             "$DOCKER_IMAGE"
